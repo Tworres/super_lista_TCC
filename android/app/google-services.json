@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "899035015589",
+    "firebase_url": "https://super-lista-c6c5f-default-rtdb.firebaseio.com",
+    "project_id": "super-lista-c6c5f",
+    "storage_bucket": "super-lista-c6c5f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:899035015589:android:68c49e312a9daf7cfee04c",
+        "android_client_info": {
+          "package_name": "com.example.super_lista"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_84krhlDkKB9t4ndU5PWuGmHKwC-AoEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

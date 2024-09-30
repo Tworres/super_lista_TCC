@@ -1,20 +1,20 @@
 class ListaDeCompraItem {
-  final int id;
-  final int listaDeCompraId;
-  final String? titulo;
-  final bool isConcluido;
-  final DateTime? concluidoEm;
-  final DateTime? criadoEm;
-  final int quantidade;
-  final double? valor;
+  int id;
+  int listaDeCompraId;
+  String? titulo;
+  bool isConcluido;
+  DateTime? concluidoEm;
+  DateTime criadoEm;
+  int quantidade;
+  double? valor;
 
   ListaDeCompraItem({
     required this.id,
     required this.listaDeCompraId,
+    required this.criadoEm,
     this.titulo,
     this.isConcluido = false,
     this.concluidoEm,
-    this.criadoEm,
     this.quantidade = 1,
     this.valor,
   });
