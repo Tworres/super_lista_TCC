@@ -1,5 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:super_lista/modals/lista_de_compra_item.dart';
+import 'package:super_lista/models/lista_de_compra_item.dart';
 
 class ListaDeCompra {
   final int id;
@@ -23,9 +22,7 @@ class ListaDeCompra {
   }
 
   static inserir(ListaDeCompra lista) {
-    ListaDeCompra._listaDeCompra.add(lista);
-    var db = FirebaseFirestore.instance;
-    db.collection('lista').doc('user1').set({"listas": _listaDeCompra});
+    return ListaDeCompra._listaDeCompra.add(lista);
   }
 
   List<ListaDeCompraItem> listaDeCompraItens() {

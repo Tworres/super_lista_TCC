@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:super_lista/blocs/lista_de_compra_item_form.dart';
 import 'package:super_lista/blocs/my_app_bar.dart';
-import 'package:super_lista/modals/lista_de_compra.dart';
-import 'package:super_lista/modals/lista_de_compra_item.dart';
+import 'package:super_lista/models/lista_de_compra.dart';
+import 'package:super_lista/models/lista_de_compra_item.dart';
 
 class ListaDeCompraItensScreen extends StatefulWidget {
   final ListaDeCompra listaDeCompra;

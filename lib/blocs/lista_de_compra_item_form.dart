@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:super_lista/modals/lista_de_compra_item.dart';
+import 'package:super_lista/models/lista_de_compra_item.dart';
 
 class ListaDeCompraItemForm extends StatefulWidget {
   final ListaDeCompraItem listaDeCompraItem;
