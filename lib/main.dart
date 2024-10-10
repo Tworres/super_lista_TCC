@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:super_lista/screens/home_screen.dart';
@@ -17,6 +18,8 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
+
+  
 
   // This widget is the root of your application.
   @override

@@ -4,6 +4,7 @@ import 'package:super_lista/blocs/lista_de_compra_item_form.dart';
 import 'package:super_lista/blocs/my_app_bar.dart';
 import 'package:super_lista/models/lista_de_compra.dart';
 import 'package:super_lista/models/lista_de_compra_item.dart';
+import 'package:super_lista/models/model_base.dart';
 
 class ListaDeCompraItensScreen extends StatefulWidget {
   final ListaDeCompra listaDeCompra;
@@ -16,7 +17,7 @@ class ListaDeCompraItensScreen extends StatefulWidget {
 class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
   _addItem() {
     setState(() {
-      ListaDeCompraItem novoItem = ListaDeCompraItem(id: 1, listaDeCompraId: widget.listaDeCompra.id, criadoEm: DateTime.now());
+      ListaDeCompraItem novoItem = ListaDeCompraItem(id: ModelBase.uid, listaDeCompraId: widget.listaDeCompra.id, criadoEm: DateTime.now());
       ListaDeCompraItem.inserir(novoItem);
     });
   }
