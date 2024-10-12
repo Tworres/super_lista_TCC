@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:super_lista/blocs/lista_de_compra_item_form.dart';
@@ -15,14 +16,8 @@ class ListaDeCompraItensScreen extends StatefulWidget {
 }
 
 class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
-  _addItem() {
-    setState(() {
-      ListaDeCompraItem novoItem = ListaDeCompraItem(id: ModelBase.uid, listaDeCompraId: widget.listaDeCompra.id, criadoEm: DateTime.now());
-      ListaDeCompraItem.inserir(novoItem);
-    });
-  }
 
-  _showModalFormItem(ListaDeCompraItem item) {
+  void _showModalFormItem(ListaDeCompraItem item) {
     showModalBottomSheet(
         context: context,
         builder: (ctx) {
@@ -35,58 +30,91 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
         });
   }
 
+  void _addItem() {
+    setState(() {
+      ListaDeCompraItem(listaDeCompraId: widget.listaDeCompra.id!, criadoEm: DateTime.now(), titulo: "#item").save();
+    });
+  }
+  
   _onItemSubmit(String titulo, int quantidade, double valor, ListaDeCompraItem item) {
     setState(() {
       item.titulo = titulo;
       item.quantidade = quantidade;
-      item.valor = valor;
+      item.save();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<ListaDeCompraItem> _listaDeCompraItens = widget.listaDeCompra.listaDeCompraItens();
-
-    final String dataTitulo = widget.listaDeCompra.data?.day == DateTime.now().day ? 'Hoje' : DateFormat('dd MMMM', 'pt_br').format(widget.listaDeCompra.data!);
-
     return Scaffold(
-      appBar: myAppBar(onBackButton: () {
-        Navigator.of(context).pop();
-      }),
+      appBar: myAppBar(onBackButton: () => Navigator.of(context).pop()),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${dataTitulo} - ${widget.listaDeCompra.titulo ?? 'Sem Titulo'}'),
-            SizedBox(
-              height: 700,
-              child: ListView(
-                scrollDirection: Axis.vertical,
-                children: [
-                  for (ListaDeCompraItem item in _listaDeCompraItens) ...[
-                    Card(
-                      child: GestureDetector(
-                        onTap: () => _showModalFormItem(item),
-                        child: ListTile(
-                          title: Text(item.titulo ?? 'Item'),
-                          leading: FlutterLogo(size: 56.0),
-                          subtitle: Text(DateFormat('MMMM, y').format(item.concluidoEm != null ? item.concluidoEm! : item.criadoEm)),
-                          trailing: Icon(Icons.more_vert),
-                        ),
-                      ),
-                    ),
-                  ]
-                ],
-              ),
-            )
-          ],
+          children: [_titulo(), _itens()],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addItem,
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  Widget _titulo() {
+    final String dataTitulo = widget.listaDeCompra.data?.day == DateTime.now().day ? 'Hoje' : DateFormat('dd MMMM', 'pt_br').format(widget.listaDeCompra.data!);
+
+    return Text('$dataTitulo - ${widget.listaDeCompra.titulo ?? 'Sem Titulo'}');
+  }
+
+  Widget _itens() {
+    final Stream<QuerySnapshot<ListaDeCompraItem>> itens = ListaDeCompraItem.all(widget.listaDeCompra.id!);
+
+    return SizedBox(
+      height: 700,
+      width: double.infinity,
+      child: StreamBuilder<QuerySnapshot<ListaDeCompraItem>>(
+        stream: itens,
+        builder: (ctx, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator()); // Enquanto aguarda
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Erro: ${snapshot.error}')); // Se ocorrer um erro
+          }
+
+          if (snapshot.data != null && snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('Nenhum item cadastrado.')); // Se não houver dados
+          }
+
+          List<ListaDeCompraItem> itens = snapshot.data!.docs.map((doc) => doc.data()).toList(); // Obtendo a lista de compras
+
+          return _itensListView(itens);
+        },
+      ),
+    );
+  }
+
+  ListView _itensListView(List<ListaDeCompraItem> itens) {
+    return ListView.builder(
+      scrollDirection: Axis.vertical,
+      itemCount: itens.length,
+      itemBuilder: (context, index) {
+        ListaDeCompraItem item = itens[index];
+        return Card(
+          child: GestureDetector(
+            onTap: () => _showModalFormItem(item),
+            child: ListTile(
+              title: Text(item.titulo ?? 'Item'),
+              leading: FlutterLogo(size: 56.0),
+              subtitle: Text(DateFormat('MMMM, y').format(item.concluidoEm != null ? item.concluidoEm! : item.criadoEm)),
+              trailing: Icon(Icons.more_vert),
+            ),
+          ),
+        );
+      },
     );
   }
 }

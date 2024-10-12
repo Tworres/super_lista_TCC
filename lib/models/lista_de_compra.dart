@@ -1,90 +1,84 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:super_lista/models/lista_de_compra_item.dart';
 import 'package:super_lista/models/model_base.dart';
 
 class ListaDeCompra extends ModelBase {
-  final String id;
+  String? id; // ID deve ser fornecido apenas pelo firebase;
+  final String userId;
   final DateTime? data;
   final String? titulo;
-  final List<ListaDeCompraItem>? itens;
 
   ListaDeCompra({
-    required this.id,
+    required this.userId,
     this.data,
     this.titulo,
-    this.itens,
+    this.id,
   });
 
-  static final List<ListaDeCompra> _listaDeCompra = [
-    ListaDeCompra(id: "1", titulo: 'lista 1', data: DateTime.now()),
-    ListaDeCompra(id: "2", titulo: 'lista 2', data: DateTime.now()),
-    ListaDeCompra(id: "3", titulo: 'lista 3', data: DateTime.now()),
-  ];
+  static CollectionReference<ListaDeCompra> get _collectionRef {
+    return ModelBase.db.collection("listas").withConverter(
+          fromFirestore: ListaDeCompra.fromFirestore,
+          toFirestore: (ListaDeCompra listaDeCompra, _) => listaDeCompra.toFirestore(),
+        );
+  }
 
-  Map<String, Object?> toJson() {
+  factory ListaDeCompra.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    SnapshotOptions? options,
+  ) {
+    final dados = snapshot.data();
+
+    return ListaDeCompra(
+      id: dados?['id'],
+      userId: dados?['userId'],
+      data: dados?['data']?.toDate(),
+      titulo: dados?['titulo'],
+    );
+  }
+
+  Map<String, dynamic> toFirestore() {
     return {
-      "id": ModelBase.uid,
-      "titulo": this.titulo,
-      "data": data != null ? Timestamp.fromDate(data!) : null,
-      "itens": listaDeCompraItens().map((e) => e.toJson()),
+      "id": id,
+      "userId": userId,
+      if (titulo != null) "titulo": titulo,
+      if (data != null) "data": data,
     };
   }
 
-  String get doc => 'lista';
+  Stream<DocumentSnapshot<ListaDeCompra>> find(String id) {
+    Stream<DocumentSnapshot<ListaDeCompra>> stream = _collectionRef.doc(id).snapshots();
 
-  static Future<List<ListaDeCompra>> todos() async {
-    var snapshot = await ModelBase.db.collection('user1').doc('lista').get();
+    stream.listen(
+      (DocumentSnapshot<ListaDeCompra> event) {
+        print("current data: ${event.data()}"); // Acessando os dados do documento
+      },
+      onError: (error) => print("Listen failed: $error"),
+    );
 
-    if (snapshot.exists) {
-      var data = snapshot.data();
-      if (data != null && data['listas'] != null) {
-        var listasData = List.from(data['listas']);
-        return listasData.map((item) {
-          List<ListaDeCompraItem> itens = (item['itens'] as List<dynamic>)
-              .map((child) => ListaDeCompraItem(
-                  id: child['id'],
-                  listaDeCompraId: item['id'],
-                  criadoEm: child['criadoEm'].toDate(),
-                  titulo: child['titulo'],
-                  valor: child['valor']))
-              .toList();
-
-          ListaDeCompra lc = ListaDeCompra(
-            id: item['id'],
-            titulo: item['titulo'],
-            data: (item['data'] as Timestamp)
-                .toDate(), // Aqui você pode carregar os itens se necessário
-            itens: itens,
-          );
-
-          return lc;
-        }).toList();
-      }
-    }
-    return []; // Retorna uma lista vazia se não encontrar dados
+    return stream;
   }
 
-  static inserir(ListaDeCompra lista) {
-    ListaDeCompra._listaDeCompra.add(lista);
+  static Stream<QuerySnapshot<ListaDeCompra>> all() {
+    // Obtendo o stream de snapshots da coleção filtrando pelo "userId"
+    Stream<QuerySnapshot<ListaDeCompra>> stream = _collectionRef.where("userId", isEqualTo: 'user1').snapshots();
 
-    updateDb();
+    // Ouvindo os eventos emitidos pelo stream
+    stream.listen(
+      (QuerySnapshot<ListaDeCompra> event) {
+        for (var doc in event.docs) {
+          print("current data: ${doc.data()}"); // Acessando os dados do documento
+        }
+      },
+      onError: (error) => print("Listen failed: $error"),
+    );
+
+    //Retornando o stream para atualização em tempo real dos dados.
+    return stream;
   }
 
-  static updateDb() {
-    try {
-      ModelBase.db.collection('user1').doc('lista').set({
-        'listas': _listaDeCompra.map(
-          (e) => e.toJson(),
-        )
-      });
-    } on FirebaseException catch (e) {
-      print("Failed with error '${e.code}': ${e.message}");
-    }
-  }
-
-  List<ListaDeCompraItem> listaDeCompraItens() {
-    return ListaDeCompraItem.todos().where((item) {
-      return item.listaDeCompraId == id;
-    }).toList();
+  /// Insere ou atualiza um dado no firebase
+  ListaDeCompra save() {
+    id ??= _collectionRef.doc().id;
+    _collectionRef.doc(id).set(this);
+    return this;
   }
 }
