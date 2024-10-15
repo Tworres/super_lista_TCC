@@ -16,7 +16,6 @@ class ListaDeCompraItensScreen extends StatefulWidget {
 }
 
 class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
-
   void _showModalFormItem(ListaDeCompraItem item) {
     showModalBottomSheet(
         context: context,
@@ -35,14 +34,17 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
       ListaDeCompraItem(listaDeCompraId: widget.listaDeCompra.id!, criadoEm: DateTime.now(), titulo: "#item").save();
     });
   }
-  
+
   _onItemSubmit(String titulo, int quantidade, double valor, ListaDeCompraItem item) {
     setState(() {
       item.titulo = titulo;
       item.quantidade = quantidade;
+      item.valor = valor;
       item.save();
     });
   }
+
+  double valorPorcentagem = 0.0;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +54,10 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [_titulo(), _itens()],
+          children: [
+            _titulo(),
+            _itens(),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -71,50 +76,90 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
   Widget _itens() {
     final Stream<QuerySnapshot<ListaDeCompraItem>> itens = ListaDeCompraItem.all(widget.listaDeCompra.id!);
 
-    return SizedBox(
-      height: 700,
-      width: double.infinity,
-      child: StreamBuilder<QuerySnapshot<ListaDeCompraItem>>(
-        stream: itens,
-        builder: (ctx, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator()); // Enquanto aguarda
-          }
+    return StreamBuilder<QuerySnapshot<ListaDeCompraItem>>(
+      stream: itens,
+      builder: (ctx, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator()); // Enquanto aguarda
+        }
 
-          if (snapshot.hasError) {
-            return Center(child: Text('Erro: ${snapshot.error}')); // Se ocorrer um erro
-          }
+        if (snapshot.hasError) {
+          return Center(child: Text('Erro: ${snapshot.error}')); // Se ocorrer um erro
+        }
 
-          if (snapshot.data != null && snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('Nenhum item cadastrado.')); // Se não houver dados
-          }
+        if (snapshot.data != null && snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('Nenhum item cadastrado.')); // Se não houver dados
+        }
 
-          List<ListaDeCompraItem> itens = snapshot.data!.docs.map((doc) => doc.data()).toList(); // Obtendo a lista de compras
+        List<ListaDeCompraItem> itens = snapshot.data!.docs.map((doc) => doc.data()).toList(); // Obtendo a lista de compras
 
-          return _itensListView(itens);
-        },
-      ),
+        itens.sort((itemA, itemB) => itemA.isConcluido ? 1 : -1);
+
+        double montanteConcluido = itens.where((ListaDeCompraItem item) => item.isConcluido).toList().fold(0.0, (sum, item) => sum + (item.valor ?? 0.0));
+        double montanteTotal = itens.fold(0.0, (sum, item) => sum + (item.valor ?? 0.0));
+
+        valorPorcentagem = montanteTotal != 0 ? montanteConcluido / montanteTotal : 0.0;
+
+        return _itensListView(itens);
+      },
     );
   }
 
-  ListView _itensListView(List<ListaDeCompraItem> itens) {
-    return ListView.builder(
-      scrollDirection: Axis.vertical,
-      itemCount: itens.length,
-      itemBuilder: (context, index) {
-        ListaDeCompraItem item = itens[index];
-        return Card(
-          child: GestureDetector(
-            onTap: () => _showModalFormItem(item),
-            child: ListTile(
-              title: Text(item.titulo ?? 'Item'),
-              leading: FlutterLogo(size: 56.0),
-              subtitle: Text(DateFormat('MMMM, y').format(item.concluidoEm != null ? item.concluidoEm! : item.criadoEm)),
-              trailing: Icon(Icons.more_vert),
-            ),
+  Widget _itensListView(List<ListaDeCompraItem> itens) {
+    return Column(
+      children: [
+        LinearProgressIndicator(
+          backgroundColor: Colors.red,
+          value: valorPorcentagem,
+          valueColor: AlwaysStoppedAnimation(const Color.fromARGB(255, 70, 211, 82)),
+        ),
+        SizedBox(
+          height: 700,
+          child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            itemCount: itens.length,
+            itemBuilder: (context, index) {
+              ListaDeCompraItem item = itens[index];
+              return Card(
+                child: GestureDetector(
+                  onTap: () => _showModalFormItem(item),
+                  child: ClipRRect(
+                    clipBehavior: Clip.hardEdge,
+                    borderRadius: BorderRadius.circular(14.0),
+                    child: Dismissible(
+                      key: Key(ModelBase.uid), // Key aleatória, como é um stream não tem necessidade
+                      background: Container(color: Colors.green),
+                      secondaryBackground: Container(color: Colors.red),
+                      onDismissed: (direction) {
+                        // Deletar
+                        if (DismissDirection.endToStart == direction) {
+                          item.delete();
+                        }
+                        // Checar
+                        if (DismissDirection.startToEnd == direction) {
+                          item.concluidoEm = DateTime.now();
+                          item.isConcluido = true;
+                          item.save();
+                        }
+                      },
+                      child: ListTile(
+                        title: Text('${item.titulo ?? 'item'} ${item.isConcluido ? '(concluído)' : ''} ${item.quantidade > 1 ? "x${item.quantidade}" : ''}'),
+                        leading: CircleAvatar(
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: FittedBox(child: Text("${item.valor ?? "0"}")),
+                          ),
+                        ),
+                        subtitle: Text(DateFormat('MMMM, y').format(item.concluidoEm != null ? item.concluidoEm! : item.criadoEm)),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 }

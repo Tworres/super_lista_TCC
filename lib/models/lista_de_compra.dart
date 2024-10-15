@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:super_lista/models/lista_de_compra_item.dart';
 import 'package:super_lista/models/model_base.dart';
 
 class ListaDeCompra extends ModelBase {
@@ -80,5 +81,23 @@ class ListaDeCompra extends ModelBase {
     id ??= _collectionRef.doc().id;
     _collectionRef.doc(id).set(this);
     return this;
+  }
+
+  Stream<QuerySnapshot<ListaDeCompraItem>>? itens(){
+    if(id != null) return ListaDeCompraItem.all(id!);
+    return null;
+  }
+
+  void delete() {
+    _collectionRef.doc(id).delete();
+
+    // Remove todos os itens associados a esta lista
+    ListaDeCompraItem.all(id!).listen(
+      (QuerySnapshot<ListaDeCompraItem> event) {
+        for (var doc in event.docs) {
+          doc.data().delete();
+        }
+      },
+    );
   }
 }

@@ -41,7 +41,7 @@ class ListaDeCompraItem extends ModelBase {
       criadoEm: dados?['criadoEm'].toDate(),
       titulo: dados?['titulo'],
       isConcluido: dados?['isConcluido'],
-      concluidoEm: dados?['concluidoEm'],
+      concluidoEm: dados?['concluidoEm']?.toDate(),
       quantidade: dados?['quantidade'],
       valor: dados?['valor'],
     );
@@ -96,5 +96,9 @@ class ListaDeCompraItem extends ModelBase {
     id ??= _collectionRef.doc().id;
     _collectionRef.doc(id).set(this);
     return this;
+  }
+
+  void delete() {
+    _collectionRef.doc(id).delete();
   }
 }

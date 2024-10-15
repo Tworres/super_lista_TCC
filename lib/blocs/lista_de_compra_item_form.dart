@@ -6,7 +6,7 @@ class ListaDeCompraItemForm extends StatefulWidget {
   final ListaDeCompraItem listaDeCompraItem;
   final Function(String titulo, int quantidade, double valor, ListaDeCompraItem item) onSubmit;
 
-  ListaDeCompraItemForm({super.key, required this.listaDeCompraItem, required this.onSubmit});
+  const ListaDeCompraItemForm({super.key, required this.listaDeCompraItem, required this.onSubmit});
 
   @override
   State<ListaDeCompraItemForm> createState() => _ListaDeCompraItemFormState();
@@ -26,7 +26,7 @@ class _ListaDeCompraItemFormState extends State<ListaDeCompraItemForm> {
   }
 
   _submitForm() {
-    widget.onSubmit(_tituloController.text, int.tryParse(_valorController.text) ?? 1, double.tryParse(_valorController.text) ?? 0.0, widget.listaDeCompraItem);
+    widget.onSubmit(_tituloController.text, int.tryParse(_quantidadeController.text) ?? 1, double.tryParse(_valorController.text) ?? 0.0, widget.listaDeCompraItem);
     Navigator.of(context).pop();
   }
 
