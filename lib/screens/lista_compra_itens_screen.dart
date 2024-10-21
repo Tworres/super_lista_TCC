@@ -5,6 +5,7 @@ import 'package:super_lista/blocs/lista_de_compra_item_form.dart';
 import 'package:super_lista/blocs/my_app_bar.dart';
 import 'package:super_lista/utils/avaliable_screen.dart';
 import 'package:super_lista/utils/colors.dart';
+import 'package:super_lista/utils/currency_input_formatter.dart';
 import 'package:super_lista/utils/date_format.dart';
 import 'package:super_lista/utils/number_format.dart';
 import 'package:super_lista/models/lista_de_compra.dart';
@@ -23,9 +24,10 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
   void _showModalFormItem(ListaDeCompraItem item) {
     showModalBottomSheet(
         context: context,
+        isScrollControlled: true,
         builder: (ctx) {
           return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 80,),
               child: ListaDeCompraItemForm(
                 listaDeCompraItem: item,
                 onSubmit: _onItemSubmit,
@@ -37,11 +39,12 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
     _showModalFormItem(ListaDeCompraItem(listaDeCompraId: widget.listaDeCompra.id!, criadoEm: DateTime.now(), titulo: ""));
   }
 
-  _onItemSubmit(String titulo, int quantidade, double valor, ListaDeCompraItem item) {
+  _onItemSubmit(String titulo, int quantidade, double valorUnidade, ListaDeCompraItem item) {
     setState(() {
       item.titulo = titulo;
       item.quantidade = quantidade;
-      item.valor = valor;
+      item.valorUnidade = valorUnidade;
+      item.valorTotal = valorUnidade * quantidade;
       item.save();
     });
   }
@@ -108,9 +111,8 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
 
         itens.sort((itemA, itemB) => itemA.isConcluido ? 1 : -1);
 
-        montanteConcluido =
-            itens.where((ListaDeCompraItem item) => item.isConcluido).toList().fold(0.0, (acc, item) => acc + ((item.valor ?? 0.0) * item.quantidade));
-        montanteTotal = itens.fold(0.0, (acc, item) => acc + ((item.valor ?? 0.0) * item.quantidade));
+        montanteConcluido = itens.where((ListaDeCompraItem item) => item.isConcluido).toList().fold(0.0, (acc, item) => acc + item.valorTotal!);
+        montanteTotal = itens.fold(0.0, (acc, item) => acc + item.valorTotal!);
 
         valorPorcentagem = montanteTotal != 0 ? montanteConcluido / montanteTotal : 0.0;
 
@@ -139,8 +141,8 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Valor Estimado', style: style),
-                    Text('${NumberformatSl.format(montanteConcluido, decimalDigits: 0)}/${NumberformatSl.format(montanteTotal, decimalDigits: 0)}',
+                    Text('Valor estimado', style: style),
+                    Text('${CurrencyInputFormatter.format(montanteConcluido)} / ${CurrencyInputFormatter.format(montanteTotal)}',
                         style: style),
                   ],
                 );
@@ -185,11 +187,11 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
               itemBuilder: (context, index) {
                 ListaDeCompraItem item = itens[index];
 
-                final valor = item.valor ?? 0;
+                final valorTotal = item.valorTotal ?? 0;
                 Widget valorW;
-                if (valor > 0) {
+                if (valorTotal > 0) {
                   valorW = Text(
-                    "${NumberformatSl.format(valor)}",
+                    "${NumberformatSl.format(valorTotal)}",
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   );
                 } else {

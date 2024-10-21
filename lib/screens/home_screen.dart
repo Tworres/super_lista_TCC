@@ -30,7 +30,7 @@ class _HomeState extends State<Home> {
         context: context,
         builder: (ctx) {
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.only(left: 20, right: 20),
             child: ListaDeCompraForm(onSubmit: _onListaDeCompraFormSubmit, listaDeCompra: listaDeCompra),
           );
         });
@@ -132,7 +132,7 @@ class _HomeState extends State<Home> {
               builder: (context, snapshot) {
                 List<ListaDeCompraItem>? itens = snapshot.data?.docs.map((doc) => doc.data()).toList(); // Obtendo a lista de compras
                 int? quantidadeItens = itens?.length;
-                double? valorTotal = itens?.fold(0.0, (acc, item) => (acc ?? 0) + (item.valor ?? 0.0));
+                double? valorTotal = itens?.fold(0.0, (acc, item) => (acc ?? 0) + (item.valorTotal ?? 0.0));
 
                 Widget quantidadeItensW;
                 if (quantidadeItens == null) {

@@ -9,7 +9,8 @@ class ListaDeCompraItem extends ModelBase {
   DateTime? concluidoEm;
   DateTime criadoEm;
   int quantidade;
-  double? valor;
+  double? valorTotal;
+  double? valorUnidade;
 
   ListaDeCompraItem({
     this.id,
@@ -19,7 +20,8 @@ class ListaDeCompraItem extends ModelBase {
     this.isConcluido = false,
     this.concluidoEm,
     this.quantidade = 1,
-    this.valor,
+    this.valorTotal,
+    this.valorUnidade,
   });
 
     static CollectionReference<ListaDeCompraItem> get _collectionRef {
@@ -43,7 +45,8 @@ class ListaDeCompraItem extends ModelBase {
       isConcluido: dados?['isConcluido'],
       concluidoEm: dados?['concluidoEm']?.toDate(),
       quantidade: dados?['quantidade'],
-      valor: dados?['valor'],
+      valorTotal: dados?['valorTotal'],
+      valorUnidade: dados?['valorUnidade'],
     );
   }
 
@@ -56,7 +59,8 @@ class ListaDeCompraItem extends ModelBase {
       "isConcluido": isConcluido,
       "concluidoEm": concluidoEm,
       "quantidade": quantidade,
-      "valor": valor,
+      "valorTotal": valorTotal,
+      "valorUnidade": valorUnidade,
     };
   }
 
