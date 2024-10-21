@@ -7,10 +7,10 @@ PreferredSizeWidget myAppBar({Function? onBackButton}) {
             onPressed: () {
               onBackButton();
             },
-            icon: Icon(Icons.arrow_back_ios),
+            icon: const Icon(Icons.arrow_back_ios),
           )
-        : Text(''),
+        : const Text(''),
     centerTitle: true,
-    title: Text('Super Lista'),
+    title: const Text('Super Lista'),
   );
 }

@@ -1,8 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:super_lista/blocs/lista_de_compra_item_form.dart';
 import 'package:super_lista/blocs/my_app_bar.dart';
+import 'package:super_lista/utils/avaliable_screen.dart';
+import 'package:super_lista/utils/colors.dart';
+import 'package:super_lista/utils/date_format.dart';
+import 'package:super_lista/utils/number_format.dart';
 import 'package:super_lista/models/lista_de_compra.dart';
 import 'package:super_lista/models/lista_de_compra_item.dart';
 import 'package:super_lista/models/model_base.dart';
@@ -21,7 +25,7 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
         context: context,
         builder: (ctx) {
           return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ListaDeCompraItemForm(
                 listaDeCompraItem: item,
                 onSubmit: _onItemSubmit,
@@ -30,9 +34,7 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
   }
 
   void _addItem() {
-    setState(() {
-      ListaDeCompraItem(listaDeCompraId: widget.listaDeCompra.id!, criadoEm: DateTime.now(), titulo: "#item").save();
-    });
+    _showModalFormItem(ListaDeCompraItem(listaDeCompraId: widget.listaDeCompra.id!, criadoEm: DateTime.now(), titulo: ""));
   }
 
   _onItemSubmit(String titulo, int quantidade, double valor, ListaDeCompraItem item) {
@@ -45,20 +47,18 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
   }
 
   double valorPorcentagem = 0.0;
-
+  double montanteConcluido = 0.0;
+  double montanteTotal = 0.0;
+  late AvaliableScreen screen;
   @override
   Widget build(BuildContext context) {
+    screen = AvaliableScreen(context);
+
     return Scaffold(
       appBar: myAppBar(onBackButton: () => Navigator.of(context).pop()),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _titulo(),
-            _itens(),
-          ],
-        ),
+        child: _itens(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addItem,
@@ -68,9 +68,26 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
   }
 
   Widget _titulo() {
-    final String dataTitulo = widget.listaDeCompra.data?.day == DateTime.now().day ? 'Hoje' : DateFormat('dd MMMM', 'pt_br').format(widget.listaDeCompra.data!);
+    int? diasDeDiferenca = widget.listaDeCompra.data?.difference(DateTime.now()).inDays;
 
-    return Text('$dataTitulo - ${widget.listaDeCompra.titulo ?? 'Sem Titulo'}');
+    String dataTitulo;
+    if (diasDeDiferenca == null) {
+      dataTitulo = 'Data não informada';
+    } else if (diasDeDiferenca == 0) {
+      dataTitulo = 'Hoje';
+    } else {
+      dataTitulo = DateFormatSl('dd MMMM').format(widget.listaDeCompra.data!);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: FittedBox(
+        child: Text(
+          '$dataTitulo - ${widget.listaDeCompra.titulo ?? 'Sem Titulo'}',
+          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w800),
+        ),
+      ),
+    );
   }
 
   Widget _itens() {
@@ -87,16 +104,13 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
           return Center(child: Text('Erro: ${snapshot.error}')); // Se ocorrer um erro
         }
 
-        if (snapshot.data != null && snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text('Nenhum item cadastrado.')); // Se não houver dados
-        }
-
         List<ListaDeCompraItem> itens = snapshot.data!.docs.map((doc) => doc.data()).toList(); // Obtendo a lista de compras
 
         itens.sort((itemA, itemB) => itemA.isConcluido ? 1 : -1);
 
-        double montanteConcluido = itens.where((ListaDeCompraItem item) => item.isConcluido).toList().fold(0.0, (sum, item) => sum + (item.valor ?? 0.0));
-        double montanteTotal = itens.fold(0.0, (sum, item) => sum + (item.valor ?? 0.0));
+        montanteConcluido =
+            itens.where((ListaDeCompraItem item) => item.isConcluido).toList().fold(0.0, (acc, item) => acc + ((item.valor ?? 0.0) * item.quantidade));
+        montanteTotal = itens.fold(0.0, (acc, item) => acc + ((item.valor ?? 0.0) * item.quantidade));
 
         valorPorcentagem = montanteTotal != 0 ? montanteConcluido / montanteTotal : 0.0;
 
@@ -107,57 +121,154 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
 
   Widget _itensListView(List<ListaDeCompraItem> itens) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LinearProgressIndicator(
-          backgroundColor: Colors.red,
-          value: valorPorcentagem,
-          valueColor: AlwaysStoppedAnimation(const Color.fromARGB(255, 70, 211, 82)),
+        SizedBox(height: screen.vh(2)),
+        SizedBox(
+          height: screen.vh(3),
+          child: _titulo(),
+        ),
+        SizedBox(height: screen.vh(1)),
+        SizedBox(
+            height: screen.vh(3),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Builder(builder: (context) {
+                TextStyle style = Theme.of(context).textTheme.labelMedium!;
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Valor Estimado', style: style),
+                    Text('${NumberformatSl.format(montanteConcluido, decimalDigits: 0)}/${NumberformatSl.format(montanteTotal, decimalDigits: 0)}',
+                        style: style),
+                  ],
+                );
+              }),
+            )),
+        SizedBox(
+          height: screen.vh(1),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: LinearProgressIndicator(
+                backgroundColor: ColorsSl.defaultC,
+                value: valorPorcentagem,
+                valueColor: AlwaysStoppedAnimation(ColorsSl.primary),
+              ),
+            ),
+          ),
         ),
         SizedBox(
-          height: 700,
-          child: ListView.builder(
-            scrollDirection: Axis.vertical,
-            itemCount: itens.length,
-            itemBuilder: (context, index) {
-              ListaDeCompraItem item = itens[index];
-              return Card(
-                child: GestureDetector(
-                  onTap: () => _showModalFormItem(item),
-                  child: ClipRRect(
-                    clipBehavior: Clip.hardEdge,
-                    borderRadius: BorderRadius.circular(14.0),
-                    child: Dismissible(
-                      key: Key(ModelBase.uid), // Key aleatória, como é um stream não tem necessidade
-                      background: Container(color: Colors.green),
-                      secondaryBackground: Container(color: Colors.red),
-                      onDismissed: (direction) {
-                        // Deletar
-                        if (DismissDirection.endToStart == direction) {
-                          item.delete();
-                        }
-                        // Checar
-                        if (DismissDirection.startToEnd == direction) {
-                          item.concluidoEm = DateTime.now();
-                          item.isConcluido = true;
-                          item.save();
-                        }
-                      },
-                      child: ListTile(
-                        title: Text('${item.titulo ?? 'item'} ${item.isConcluido ? '(concluído)' : ''} ${item.quantidade > 1 ? "x${item.quantidade}" : ''}'),
-                        leading: CircleAvatar(
-                          child: Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: FittedBox(child: Text("${item.valor ?? "0"}")),
+          height: screen.vh(1),
+        ),
+        SizedBox(
+          height: screen.vh(89),
+          child: Builder(builder: (context) {
+            if (itens.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Nenhum item cadastrado", style: Theme.of(context).textTheme.labelMedium),
+                  ],
+                ),
+              );
+            }
+
+            return ListView.builder(
+              scrollDirection: Axis.vertical,
+              itemCount: itens.length,
+              itemBuilder: (context, index) {
+                ListaDeCompraItem item = itens[index];
+
+                final valor = item.valor ?? 0;
+                Widget valorW;
+                if (valor > 0) {
+                  valorW = Text(
+                    "${NumberformatSl.format(valor)}",
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  );
+                } else {
+                  valorW = const Icon(Icons.attach_money_rounded);
+                }
+
+                Color circleMoneyColor;
+
+                if (item.isConcluido) {
+                  circleMoneyColor = ColorsSl.primary;
+                } else {
+                  circleMoneyColor = ColorsSl.secondary;
+                }
+
+                return Card(
+                  color: ColorsSl.defaultC,
+                  child: GestureDetector(
+                    onTap: () => _showModalFormItem(item),
+                    child: ClipRRect(
+                      clipBehavior: Clip.hardEdge,
+                      borderRadius: BorderRadius.circular(14.0),
+                      child: Dismissible(
+                        key: Key(ModelBase.uid), // Key aleatória, como é um stream não tem necessidade
+                        background: Container(color: item.isConcluido ? ColorsSl.secondary : ColorsSl.primary),
+                        secondaryBackground: Container(color: Colors.red),
+
+                        onDismissed: (direction) {
+                          // Deletar
+                          if (DismissDirection.endToStart == direction) {
+                            item.delete();
+                          }
+                          // Checar
+                          if (DismissDirection.startToEnd == direction) {
+                            if (item.isConcluido) {
+                              item.setConcluido(false);
+                            } else {
+                              item.setConcluido(true);
+                            }
+                            item.save();
+                          }
+                        },
+                        child: ListTile(
+                          title: Text.rich(TextSpan(children: [
+                            TextSpan(text: item.titulo ?? 'item'),
+                            const TextSpan(text: " "),
+                            TextSpan(
+                              style: TextStyle(fontWeight: FontWeight.w700, color: ColorsSl.textBodySecondary),
+                              text: item.quantidade > 1 ? "x${item.quantidade}" : '',
+                            ),
+                          ])),
+                          leading: SizedBox(
+                            width: 55,
+                            height: 55,
+                            child: Card(
+                              elevation: 0,
+                              color: circleMoneyColor,
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  FittedBox(
+                                      child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                                    child: valorW,
+                                  ))
+                                ],
+                              ),
+                            ),
                           ),
+                          subtitle: Text(DateFormatSl('MMMM, y').format(item.concluidoEm != null ? item.concluidoEm! : item.criadoEm)),
                         ),
-                        subtitle: Text(DateFormat('MMMM, y').format(item.concluidoEm != null ? item.concluidoEm! : item.criadoEm)),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            );
+          }),
         ),
       ],
     );

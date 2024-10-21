@@ -4,9 +4,9 @@ import 'package:super_lista/models/model_base.dart';
 
 class ListaDeCompra extends ModelBase {
   String? id; // ID deve ser fornecido apenas pelo firebase;
-  final String userId;
-  final DateTime? data;
-  final String? titulo;
+  String userId;
+  DateTime? data;
+  String? titulo;
 
   ListaDeCompra({
     required this.userId,
@@ -48,29 +48,12 @@ class ListaDeCompra extends ModelBase {
   Stream<DocumentSnapshot<ListaDeCompra>> find(String id) {
     Stream<DocumentSnapshot<ListaDeCompra>> stream = _collectionRef.doc(id).snapshots();
 
-    stream.listen(
-      (DocumentSnapshot<ListaDeCompra> event) {
-        print("current data: ${event.data()}"); // Acessando os dados do documento
-      },
-      onError: (error) => print("Listen failed: $error"),
-    );
-
     return stream;
   }
 
   static Stream<QuerySnapshot<ListaDeCompra>> all() {
     // Obtendo o stream de snapshots da coleção filtrando pelo "userId"
     Stream<QuerySnapshot<ListaDeCompra>> stream = _collectionRef.where("userId", isEqualTo: 'user1').snapshots();
-
-    // Ouvindo os eventos emitidos pelo stream
-    stream.listen(
-      (QuerySnapshot<ListaDeCompra> event) {
-        for (var doc in event.docs) {
-          print("current data: ${doc.data()}"); // Acessando os dados do documento
-        }
-      },
-      onError: (error) => print("Listen failed: $error"),
-    );
 
     //Retornando o stream para atualização em tempo real dos dados.
     return stream;

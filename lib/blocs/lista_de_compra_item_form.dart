@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:super_lista/models/lista_de_compra_item.dart';
 
 class ListaDeCompraItemForm extends StatefulWidget {
@@ -17,6 +16,7 @@ class _ListaDeCompraItemFormState extends State<ListaDeCompraItemForm> {
   late TextEditingController _quantidadeController;
   late TextEditingController _valorController;
 
+  @override
   void initState() {
     super.initState();
 
@@ -26,15 +26,23 @@ class _ListaDeCompraItemFormState extends State<ListaDeCompraItemForm> {
   }
 
   _submitForm() {
-    widget.onSubmit(_tituloController.text, int.tryParse(_quantidadeController.text) ?? 1, double.tryParse(_valorController.text) ?? 0.0, widget.listaDeCompraItem);
+    final titulo = _tituloController.text;
+    final quantidade = int.tryParse(_quantidadeController.text);
+    final valor = double.tryParse(_valorController.text);
+
+    if(quantidade == null || titulo == "") return;
+
+    widget.onSubmit(_tituloController.text, quantidade, valor??0.0, widget.listaDeCompraItem);
     Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       children: [
         TextField(
+          autofocus: true,
           decoration: const InputDecoration(label: Text('Nome Produto')),
           controller: _tituloController,
         ),
@@ -59,7 +67,7 @@ class _ListaDeCompraItemFormState extends State<ListaDeCompraItemForm> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            ElevatedButton(onPressed: _submitForm, child: const Text('Editar')),
+            ElevatedButton(onPressed: _submitForm, child: const Text('Salvar')),
           ],
         )
       ],

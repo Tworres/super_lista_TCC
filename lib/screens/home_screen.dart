@@ -1,11 +1,9 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:super_lista/blocs/lista_de_compra_form.dart';
 import 'package:super_lista/blocs/my_app_bar.dart';
-import 'package:super_lista/config/colors.dart';
+import 'package:super_lista/utils/colors.dart';
 import 'package:super_lista/models/lista_de_compra.dart';
 import 'package:super_lista/models/lista_de_compra_item.dart';
 import 'package:super_lista/screens/lista_compra_itens_screen.dart';
@@ -18,19 +16,22 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  _onListaDeCompraFormSubmit(String? titulo, DateTime? data) {
+  _onListaDeCompraFormSubmit(ListaDeCompra lc, String? titulo, DateTime? data) {
     setState(() {
-      ListaDeCompra(data: data, titulo: titulo, userId: 'user1').save();
+      lc.data = data;
+      lc.titulo = titulo;
+
+      lc.save();
     });
   }
 
-  _showModalFormLista() {
+  _showModalFormLista([ListaDeCompra? listaDeCompra]) {
     showModalBottomSheet(
         context: context,
         builder: (ctx) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: ListaDeCompraForm(onSubmit: _onListaDeCompraFormSubmit),
+            child: ListaDeCompraForm(onSubmit: _onListaDeCompraFormSubmit, listaDeCompra: listaDeCompra),
           );
         });
   }
@@ -87,15 +88,18 @@ class _HomeState extends State<Home> {
 
   /// cria uma unica lista
   Widget _listasBuilder(BuildContext context, List<ListaDeCompra> listas) {
-    int hoje = int.tryParse("${DateTime.now().year}${DateTime.now().month}${DateTime.now().day}")!;
+    int hoje = int.tryParse(DateFormat("y-M-d").format(DateTime.now()).replaceAll('-', ''))!;
 
     listas.sort((a, b) {
-      int dataListaA = int.tryParse("${a.data!.year}${a.data!.month}${a.data!.day}")!;
+      int dataListaA = int.tryParse(DateFormat("y-M-d").format(a.data!).replaceAll('-', ''))!;
+      int dataListaB = int.tryParse(DateFormat("y-M-d").format(b.data!).replaceAll('-', ''))!;
 
-      if (dataListaA == hoje) return -1;
-      if (dataListaA > hoje) return 0;
-      if (dataListaA < hoje) return 1;
-      return 1;
+      if (dataListaA == hoje && dataListaB != hoje) return -1; // a é de hoje, b não
+      if (dataListaB == hoje && dataListaA != hoje) return 1; // b é de hoje, a não
+      if (dataListaA > hoje && dataListaB <= hoje) return -1; // a é do futuro, b é do passado ou hoje
+      if (dataListaB > hoje && dataListaA <= hoje) return 1; // b é do futuro, a é do passado ou hoje
+
+      return dataListaA > dataListaB ? -1 : 1; // Ordena pela data normalmente
     });
 
     return SizedBox(
@@ -112,11 +116,11 @@ class _HomeState extends State<Home> {
           int dataLista = int.tryParse("${lista.data!.year}${lista.data!.month}${lista.data!.day}")!;
 
           if (dataLista > hoje) {
-            cardColor = SLcolors.defaultC;
+            cardColor = ColorsSl.defaultC;
           } else if (dataLista == hoje) {
-            cardColor = SLcolors.primary;
+            cardColor = ColorsSl.primary;
           } else {
-            cardColor = SLcolors.secondary;
+            cardColor = ColorsSl.secondary;
           }
 
           String tituloLista = dataLista == hoje ? 'Hoje' : DateFormat('dd MMM', 'pt_br').format(lista.data!);
@@ -128,20 +132,28 @@ class _HomeState extends State<Home> {
               builder: (context, snapshot) {
                 List<ListaDeCompraItem>? itens = snapshot.data?.docs.map((doc) => doc.data()).toList(); // Obtendo a lista de compras
                 int? quantidadeItens = itens?.length;
-                double? valorTotal = itens?.fold(0.0, (sum, item) => (sum ?? 0) + (item.valor ?? 0.0));
+                double? valorTotal = itens?.fold(0.0, (acc, item) => (acc ?? 0) + (item.valor ?? 0.0));
 
                 Widget quantidadeItensW;
                 if (quantidadeItens == null) {
                   quantidadeItensW = const CircularProgressIndicator();
                 } else {
-                  quantidadeItensW = FittedBox(child: Text("$quantidadeItens itens",style: const TextStyle(fontSize: 11),));
+                  quantidadeItensW = FittedBox(
+                      child: Text(
+                    "$quantidadeItens itens",
+                    style: const TextStyle(fontSize: 11),
+                  ));
                 }
 
                 Widget valorTotalW;
                 if (valorTotal == null) {
                   valorTotalW = const CircularProgressIndicator();
                 } else {
-                  valorTotalW = FittedBox(child: Text("R\$$valorTotal",style: const TextStyle(fontSize: 11),));
+                  valorTotalW = FittedBox(
+                      child: Text(
+                    "R\$$valorTotal",
+                    style: const TextStyle(fontSize: 11),
+                  ));
                 }
 
                 return GestureDetector(
@@ -155,11 +167,15 @@ class _HomeState extends State<Home> {
                   onLongPress: () {
                     showMenu(
                       context: context,
-                      position: RelativeRect.fromLTRB(0, 100, 10, 0),
+                      position: const RelativeRect.fromLTRB(0, 100, 10, 0),
                       items: [
                         PopupMenuItem(
-                          child: Text('Deletar'),
+                          child: const Text('Editar'),
+                          onTap: () =>   _showModalFormLista(lista),
+                        ),
+                        PopupMenuItem(
                           onTap: lista.delete,
+                          child: const Text('Deletar'),
                         ),
                       ],
                     );
