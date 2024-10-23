@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:super_lista/blocs/lista_de_compra_item_form.dart';
 import 'package:super_lista/blocs/my_app_bar.dart';
+import 'package:super_lista/blocs/valor_estimado.dart';
 import 'package:super_lista/utils/avaliable_screen.dart';
 import 'package:super_lista/utils/colors.dart';
 import 'package:super_lista/utils/currency_input_formatter.dart';
 import 'package:super_lista/utils/date_format.dart';
-import 'package:super_lista/utils/number_format.dart';
 import 'package:super_lista/models/lista_de_compra.dart';
 import 'package:super_lista/models/lista_de_compra_item.dart';
 import 'package:super_lista/models/model_base.dart';
@@ -27,7 +27,11 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
         isScrollControlled: true,
         builder: (ctx) {
           return Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20, top: 80,),
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 80,
+              ),
               child: ListaDeCompraItemForm(
                 listaDeCompraItem: item,
                 onSubmit: _onItemSubmit,
@@ -59,9 +63,11 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
 
     return Scaffold(
       appBar: myAppBar(onBackButton: () => Navigator.of(context).pop()),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: _itens(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: _itens(),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addItem,
@@ -87,7 +93,7 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
       child: FittedBox(
         child: Text(
           '$dataTitulo - ${widget.listaDeCompra.titulo ?? 'Sem Titulo'}',
-          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w800),
+          style: Theme.of(context).textTheme.displayMedium,
         ),
       ),
     );
@@ -132,34 +138,10 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
         ),
         SizedBox(height: screen.vh(1)),
         SizedBox(
-            height: screen.vh(3),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Builder(builder: (context) {
-                TextStyle style = Theme.of(context).textTheme.labelMedium!;
-
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Valor estimado', style: style),
-                    Text('${CurrencyInputFormatter.format(montanteConcluido)} / ${CurrencyInputFormatter.format(montanteTotal)}',
-                        style: style),
-                  ],
-                );
-              }),
-            )),
-        SizedBox(
-          height: screen.vh(1),
+          height: screen.vh(4),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: LinearProgressIndicator(
-                backgroundColor: ColorsSl.defaultC,
-                value: valorPorcentagem,
-                valueColor: AlwaysStoppedAnimation(ColorsSl.primary),
-              ),
-            ),
+            child: ValorEstimado(itens: itens),
           ),
         ),
         SizedBox(
@@ -190,33 +172,49 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
                 final valorTotal = item.valorTotal ?? 0;
                 Widget valorW;
                 if (valorTotal > 0) {
-                  valorW = Text(
-                    "${NumberformatSl.format(valorTotal)}",
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  valorW = FittedBox(
+                    child: Text(
+                      CurrencyInputFormatter.format(valorTotal),
+                      style: Theme.of(context).textTheme.displayMedium,
+                    ),
                   );
                 } else {
                   valorW = const Icon(Icons.attach_money_rounded);
                 }
 
-                Color circleMoneyColor;
+                Color cardColor;
 
                 if (item.isConcluido) {
-                  circleMoneyColor = ColorsSl.primary;
+                  cardColor = ColorsSl.primary;
                 } else {
-                  circleMoneyColor = ColorsSl.secondary;
+                  cardColor = ColorsSl.defaultC;
                 }
 
+                TextStyle subtitleStyle = GoogleFonts.poppins(fontSize: 12);
+                Widget subtitle = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text('Valor unitário', style: subtitleStyle),
+                        Text(' ', style: subtitleStyle),
+                        Text(CurrencyInputFormatter.format(item.valorUnidade), style: subtitleStyle),
+                      ],
+                    ),
+                  ],
+                );
+
                 return Card(
-                  color: ColorsSl.defaultC,
+                  color: cardColor,
                   child: GestureDetector(
                     onTap: () => _showModalFormItem(item),
                     child: ClipRRect(
                       clipBehavior: Clip.hardEdge,
-                      borderRadius: BorderRadius.circular(14.0),
+                      borderRadius: BorderRadius.circular(10.0),
                       child: Dismissible(
                         key: Key(ModelBase.uid), // Key aleatória, como é um stream não tem necessidade
-                        background: Container(color: item.isConcluido ? ColorsSl.secondary : ColorsSl.primary),
-                        secondaryBackground: Container(color: Colors.red),
+                        background: primaryBackgroundDismissible(item.isConcluido),
+                        secondaryBackground: secondaryBackgroundDismissible(),
 
                         onDismissed: (direction) {
                           // Deletar
@@ -243,26 +241,10 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
                             ),
                           ])),
                           leading: SizedBox(
-                            width: 55,
-                            height: 55,
-                            child: Card(
-                              elevation: 0,
-                              color: circleMoneyColor,
-                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  FittedBox(
-                                      child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                                    child: valorW,
-                                  ))
-                                ],
-                              ),
-                            ),
+                            width: screen.vw(12),
+                            child: valorW,
                           ),
-                          subtitle: Text(DateFormatSl('MMMM, y').format(item.concluidoEm != null ? item.concluidoEm! : item.criadoEm)),
+                          subtitle: subtitle,
                         ),
                       ),
                     ),
@@ -273,6 +255,74 @@ class _ListaDeCompraItensScreenState extends State<ListaDeCompraItensScreen> {
           }),
         ),
       ],
+    );
+  }
+
+  Container secondaryBackgroundDismissible() {
+    return Container(
+      alignment: Alignment.center,
+      color: Colors.redAccent,
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Icon(
+              Icons.delete,
+              color: Colors.white,
+            ),
+            Text(
+              'Deletar',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Container primaryBackgroundDismissible(bool isConcluido) {
+    List<Widget> actionText;
+    if (isConcluido) {
+      actionText = [
+        Icon(
+          Icons.restart_alt_outlined,
+          color: ColorsSl.textBody,
+        ),
+        Text(
+          'Não concluído',
+          style: TextStyle(
+            color: ColorsSl.textBody,
+          ),
+        )
+      ];
+    } else {
+      actionText = [
+        Icon(
+          Icons.check,
+          color: ColorsSl.textBody,
+        ),
+        Text(
+          'Concluído',
+          style: TextStyle(
+            color: ColorsSl.textBody,
+          ),
+        )
+      ];
+    }
+
+    return Container(
+      alignment: Alignment.center,
+      color: ColorsSl.primary,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: actionText,
+        ),
+      ),
     );
   }
 }

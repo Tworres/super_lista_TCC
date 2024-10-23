@@ -31,7 +31,7 @@ class _ListaDeCompraFormState extends State<ListaDeCompraForm> {
   _showDatePicker() {
     showDatePicker(
       context: context,
-      firstDate: DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 360)),
       lastDate: DateTime.now().add(const Duration(days: 360)),
       initialDate: DateTime.now(),
     ).then((pickedDate) {

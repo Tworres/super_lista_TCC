@@ -61,12 +61,32 @@ class MyApp extends StatelessWidget {
       ).copyWith(
         titleMedium: GoogleFonts.poppins(
           fontWeight: FontWeight.w800,
-          color: ColorsSl.titleBody,
+          color: ColorsSl.titleBodySecondary,
         ),
         labelMedium: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w800,
           color: ColorsSl.textBodySecondary,
+        ),
+        displayLarge: GoogleFonts.poppins(
+          fontSize: 19,
+          fontWeight: FontWeight.w800,
+          color: ColorsSl.textBody
+        ),
+        displayMedium: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+          color: ColorsSl.textBody
+        ), 
+        displaySmall: GoogleFonts.poppins(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: ColorsSl.textBody
+        ),
+        bodySmall: GoogleFonts.poppins(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: ColorsSl.textBody
         ),
       ),
     );
