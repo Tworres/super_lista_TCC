@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:super_lista/providers/auth.dart';
 import 'package:super_lista/utils/colors.dart';
 import 'package:super_lista/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,6 +15,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await Auth.ensureInitialized(); // Necessário para fazer consultas
 
   runApp(const MyApp());
 }
@@ -59,35 +63,12 @@ class MyApp extends StatelessWidget {
       textTheme: GoogleFonts.poppinsTextTheme(
         Theme.of(context).textTheme,
       ).copyWith(
-        titleMedium: GoogleFonts.poppins(
-          fontWeight: FontWeight.w800,
-          color: ColorsSl.titleBodySecondary,
-        ),
-        labelMedium: GoogleFonts.poppins(
-          fontSize: 12,
-          fontWeight: FontWeight.w800,
-          color: ColorsSl.textBodySecondary,
-        ),
-        displayLarge: GoogleFonts.poppins(
-          fontSize: 19,
-          fontWeight: FontWeight.w800,
-          color: ColorsSl.textBody
-        ),
-        displayMedium: GoogleFonts.poppins(
-          fontSize: 16,
-          fontWeight: FontWeight.w800,
-          color: ColorsSl.textBody
-        ), 
-        displaySmall: GoogleFonts.poppins(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: ColorsSl.textBody
-        ),
-        bodySmall: GoogleFonts.poppins(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: ColorsSl.textBody
-        ),
+        titleMedium: GoogleFonts.poppins(fontWeight: FontWeight.w800, color: ColorsSl.titleBodySecondary),
+        labelMedium: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w800, color: ColorsSl.textBodySecondary),
+        displayLarge: GoogleFonts.poppins(fontSize: 19, fontWeight: FontWeight.w800, color: ColorsSl.textBody),
+        displayMedium: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w800, color: ColorsSl.textBody),
+        displaySmall: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: ColorsSl.textBody),
+        bodySmall: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: ColorsSl.textBody),
       ),
     );
   }

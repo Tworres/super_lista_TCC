@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:super_lista/models/lista_de_compra_item.dart';
 import 'package:super_lista/models/model_base.dart';
+import 'package:super_lista/providers/auth.dart';
 
-class ListaDeCompra extends ModelBase {
+class ListaDeCompra {
   String? id; // ID deve ser fornecido apenas pelo firebase;
   String userId;
   DateTime? data;
@@ -52,8 +53,9 @@ class ListaDeCompra extends ModelBase {
   }
 
   static Stream<QuerySnapshot<ListaDeCompra>> all() {
+    final userId = Auth.id();
     // Obtendo o stream de snapshots da coleção filtrando pelo "userId"
-    Stream<QuerySnapshot<ListaDeCompra>> stream = _collectionRef.where("userId", isEqualTo: 'user1').snapshots();
+    Stream<QuerySnapshot<ListaDeCompra>> stream = _collectionRef.where("userId", isEqualTo: userId).snapshots();
 
     //Retornando o stream para atualização em tempo real dos dados.
     return stream;
@@ -66,8 +68,8 @@ class ListaDeCompra extends ModelBase {
     return this;
   }
 
-  Stream<QuerySnapshot<ListaDeCompraItem>>? itens(){
-    if(id != null) return ListaDeCompraItem.all(id!);
+  Stream<QuerySnapshot<ListaDeCompraItem>>? itens() {
+    if (id != null) return ListaDeCompraItem.all(id!);
     return null;
   }
 

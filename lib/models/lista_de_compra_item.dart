@@ -71,7 +71,7 @@ class ListaDeCompraItem extends ModelBase {
   }
 
   static Stream<QuerySnapshot<ListaDeCompraItem>> all(String listaDeCompraId) {
-    // Obtendo o stream de snapshots da coleção filtrando pelo "userId"
+    // Obtendo o stream de snapshots da coleção filtrando pela lista
     Stream<QuerySnapshot<ListaDeCompraItem>> stream = _collectionRef.where("listaDeCompraId", isEqualTo: listaDeCompraId).snapshots();
     
     //Retornando o stream para atualização em tempo real dos dados.

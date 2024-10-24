@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:super_lista/models/lista_de_compra.dart';
+import 'package:super_lista/providers/auth.dart';
 
 class ListaDeCompraForm extends StatefulWidget {
   final Function(ListaDeCompra listaDeCompra, String? titulo, DateTime? data) onSubmit;
@@ -43,9 +44,11 @@ class _ListaDeCompraFormState extends State<ListaDeCompraForm> {
     });
   }
 
-  _submitForm() {
+  _submitForm() async {
+    final userId = await Auth.id();
+    
     final titulo = _tituloController.text;
-    final listaDeCompra = widget.listaDeCompra ?? ListaDeCompra(userId: 'user1');
+    final listaDeCompra = widget.listaDeCompra ?? ListaDeCompra(userId: userId);
     widget.onSubmit(listaDeCompra, titulo, _selectedDate);
 
     Navigator.of(context).pop();
