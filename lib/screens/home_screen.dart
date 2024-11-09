@@ -9,7 +9,6 @@ import 'package:super_lista/utils/colors.dart';
 import 'package:super_lista/models/lista_de_compra.dart';
 import 'package:super_lista/models/lista_de_compra_item.dart';
 import 'package:super_lista/screens/lista_compra_itens_screen.dart';
-import 'package:super_lista/utils/currency_input_formatter.dart';
 import 'package:super_lista/utils/date_format.dart';
 
 enum SampleItem { itemOne, itemTwo, itemThree }
@@ -22,24 +21,29 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  
+  /// Evento ocorre quando o botão de "salvar" é clicado no formulário.
   _onListaDeCompraFormSubmit(ListaDeCompra lc, String? titulo, DateTime? data) {
     setState(() {
       lc.data = data;
       lc.titulo = titulo;
 
+      // Salva as alterações no banco de dados.
       lc.save();
     });
   }
 
+  /// Evento ocorre quando é clicado no botão flutuante, abre um formulário para salvar uma lista.
   _showModalFormLista([ListaDeCompra? listaDeCompra]) {
     showModalBottomSheet(
-        context: context,
-        builder: (ctx) {
-          return Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20),
-            child: ListaDeCompraForm(onSubmit: _onListaDeCompraFormSubmit, listaDeCompra: listaDeCompra),
-          );
-        });
+      context: context,
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.only(left: 20, right: 20),
+          child: ListaDeCompraForm(onSubmit: _onListaDeCompraFormSubmit, listaDeCompra: listaDeCompra),
+        );
+      },
+    );
   }
 
   late AvaliableScreen screen;
@@ -179,7 +183,10 @@ class _HomeState extends State<Home> {
     if (quantidadeItens == null) {
       quantidadeItensW = const CircularProgressIndicator();
     } else {
-      quantidadeItensW = Text("$quantidadeItens itens", style: Theme.of(context).textTheme.bodySmall,);
+      quantidadeItensW = Text(
+        "$quantidadeItens itens",
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     return ListTile(

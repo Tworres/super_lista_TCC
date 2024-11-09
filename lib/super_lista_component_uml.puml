@@ -1,0 +1,259 @@
+@startuml
+set namespaceSeparator ::
+
+class "super_lista::blocs::lista_de_compra_form.dart::ListaDeCompraForm" {
+  +dynamic Function(ListaDeCompra, String?, DateTime?) onSubmit
+  +ListaDeCompra? listaDeCompra
+  +State<ListaDeCompraForm> createState()
+}
+
+"super_lista::blocs::lista_de_compra_form.dart::ListaDeCompraForm" o-- "null::dynamic Function(ListaDeCompra, String, DateTime)"
+"super_lista::blocs::lista_de_compra_form.dart::ListaDeCompraForm" o-- "super_lista::models::lista_de_compra.dart::ListaDeCompra"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "super_lista::blocs::lista_de_compra_form.dart::ListaDeCompraForm"
+
+class "super_lista::blocs::lista_de_compra_form.dart::_ListaDeCompraFormState" {
+  -TextEditingController _tituloController
+  -DateTime? _selectedDate
+  +void initState()
+  -dynamic _showDatePicker()
+  -dynamic _submitForm()
+  +Widget build()
+}
+
+"super_lista::blocs::lista_de_compra_form.dart::_ListaDeCompraFormState" o-- "flutter::src::widgets::editable_text.dart::TextEditingController"
+"flutter::src::widgets::framework.dart::State" <|-- "super_lista::blocs::lista_de_compra_form.dart::_ListaDeCompraFormState"
+
+class "super_lista::blocs::lista_de_compra_item_form.dart::ListaDeCompraItemForm" {
+  +ListaDeCompraItem listaDeCompraItem
+  +dynamic Function(String, int, double, ListaDeCompraItem) onSubmit
+  +State<ListaDeCompraItemForm> createState()
+}
+
+"super_lista::blocs::lista_de_compra_item_form.dart::ListaDeCompraItemForm" o-- "super_lista::models::lista_de_compra_item.dart::ListaDeCompraItem"
+"super_lista::blocs::lista_de_compra_item_form.dart::ListaDeCompraItemForm" o-- "null::dynamic Function(String, int, double, ListaDeCompraItem)"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "super_lista::blocs::lista_de_compra_item_form.dart::ListaDeCompraItemForm"
+
+class "super_lista::blocs::lista_de_compra_item_form.dart::_ListaDeCompraItemFormState" {
+  -TextEditingController _tituloController
+  -TextEditingController _quantidadeController
+  -TextEditingController _valorUnidadeController
+  -TextEditingController _valorTotalController
+  -dynamic _sum()
+  -dynamic _sincronizarValorTotal()
+  -dynamic _sincronizarValorUnidade()
+  +void initState()
+  -dynamic _submitForm()
+  +Widget build()
+}
+
+"super_lista::blocs::lista_de_compra_item_form.dart::_ListaDeCompraItemFormState" o-- "flutter::src::widgets::editable_text.dart::TextEditingController"
+"flutter::src::widgets::framework.dart::State" <|-- "super_lista::blocs::lista_de_compra_item_form.dart::_ListaDeCompraItemFormState"
+
+class "super_lista::blocs::valor_estimado.dart::ValorEstimado" {
+  +List<ListaDeCompraItem>? itens
+  +TextStyle? textStyle
+  +Color? progressBgColor
+  +Color? progressBarColor
+  +double? fontSize
+  +Widget build()
+}
+
+"super_lista::blocs::valor_estimado.dart::ValorEstimado" o-- "flutter::src::painting::text_style.dart::TextStyle"
+"super_lista::blocs::valor_estimado.dart::ValorEstimado" o-- "dart::ui::Color"
+"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "super_lista::blocs::valor_estimado.dart::ValorEstimado"
+
+class "super_lista::firebase_options.dart::DefaultFirebaseOptions" {
+  {static} +FirebaseOptions web
+  {static} +FirebaseOptions android
+  {static} +FirebaseOptions ios
+  {static} +FirebaseOptions macos
+  {static} +FirebaseOptions windows
+  {static} +FirebaseOptions currentPlatform
+}
+
+"super_lista::firebase_options.dart::DefaultFirebaseOptions" o-- "firebase_core_platform_interface::firebase_core_platform_interface.dart::FirebaseOptions"
+
+class "super_lista::main.dart::MyApp" {
+  +Widget build()
+  -ThemeData _themeDataSuperLista()
+}
+
+"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "super_lista::main.dart::MyApp"
+
+class "super_lista::models::lista_de_compra.dart::ListaDeCompra" {
+  +String? id
+  +String userId
+  +DateTime? data
+  +String? titulo
+  {static} -CollectionReference<ListaDeCompra> _collectionRef
+  +Map<String, dynamic> toFirestore()
+  {static} +Stream<DocumentSnapshot<ListaDeCompra>> find()
+  {static} +Stream<QuerySnapshot<ListaDeCompra>> all()
+  +ListaDeCompra save()
+  +Stream<QuerySnapshot<ListaDeCompraItem>>? itens()
+  +void delete()
+}
+
+"super_lista::models::lista_de_compra.dart::ListaDeCompra" o-- "cloud_firestore::cloud_firestore.dart::CollectionReference<ListaDeCompra>"
+
+class "super_lista::models::lista_de_compra_item.dart::ListaDeCompraItem" {
+  +String? titulo
+  +String? id
+  +String listaDeCompraId
+  +bool isConcluido
+  +DateTime? concluidoEm
+  +DateTime criadoEm
+  +int quantidade
+  +double? valorTotal
+  +double? valorUnidade
+  {static} -CollectionReference<ListaDeCompraItem> _collectionRef
+  +Map<String, dynamic> toFirestore()
+  +Stream<DocumentSnapshot<ListaDeCompraItem>> find()
+  {static} +Stream<QuerySnapshot<ListaDeCompraItem>> all()
+  +ListaDeCompraItem setConcluido()
+  +ListaDeCompraItem save()
+  +void delete()
+}
+
+"super_lista::models::lista_de_compra_item.dart::ListaDeCompraItem" o-- "cloud_firestore::cloud_firestore.dart::CollectionReference<ListaDeCompraItem>"
+"super_lista::models::model_base.dart::ModelBase" <|-- "super_lista::models::lista_de_compra_item.dart::ListaDeCompraItem"
+
+abstract class "super_lista::models::model_base.dart::ModelBase" {
+  {static} +FirebaseFirestore db
+  {static} +String uid
+}
+
+"super_lista::models::model_base.dart::ModelBase" o-- "cloud_firestore::cloud_firestore.dart::FirebaseFirestore"
+
+class "super_lista::providers::auth.dart::Auth" {
+  -UserCredential? _userCredential
+  -User? _user
+  -String? _id
+  {static} +AuthState state
+  {static} -Auth? _instance
+  {static} -Auth _getInstance()
+  {static} +String id()
+  {static} +dynamic user()
+  {static} +dynamic ensureInitialized()
+}
+
+"super_lista::providers::auth.dart::Auth" o-- "firebase_auth::firebase_auth.dart::UserCredential"
+"super_lista::providers::auth.dart::Auth" o-- "firebase_auth::firebase_auth.dart::User"
+"super_lista::providers::auth.dart::Auth" o-- "super_lista::providers::auth.dart::AuthState"
+"super_lista::providers::auth.dart::Auth" o-- "super_lista::providers::auth.dart::Auth"
+
+class "super_lista::providers::auth.dart::AuthState" {
+  +int index
+  {static} +List<AuthState> values
+  {static} +AuthState loading
+  {static} +AuthState signed
+  {static} +AuthState notSigned
+}
+
+"super_lista::providers::auth.dart::AuthState" o-- "super_lista::providers::auth.dart::AuthState"
+"dart::core::Enum" <|-- "super_lista::providers::auth.dart::AuthState"
+
+class "super_lista::screens::home_screen.dart::Home" {
+  +State<Home> createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "super_lista::screens::home_screen.dart::Home"
+
+class "super_lista::screens::home_screen.dart::_HomeState" {
+  +AvaliableScreen screen
+  +SampleItem? selectedItem
+  +int hoje
+  -dynamic _onListaDeCompraFormSubmit()
+  -dynamic _showModalFormLista()
+  +Widget build()
+  +StreamBuilder<QuerySnapshot<ListaDeCompra>> streamDeListas()
+  -ListTile _listaTile()
+}
+
+"super_lista::screens::home_screen.dart::_HomeState" o-- "super_lista::utils::avaliable_screen.dart::AvaliableScreen"
+"super_lista::screens::home_screen.dart::_HomeState" o-- "super_lista::screens::home_screen.dart::SampleItem"
+"flutter::src::widgets::framework.dart::State" <|-- "super_lista::screens::home_screen.dart::_HomeState"
+
+class "super_lista::screens::home_screen.dart::SampleItem" {
+  +int index
+  {static} +List<SampleItem> values
+  {static} +SampleItem itemOne
+  {static} +SampleItem itemTwo
+  {static} +SampleItem itemThree
+}
+
+"super_lista::screens::home_screen.dart::SampleItem" o-- "super_lista::screens::home_screen.dart::SampleItem"
+"dart::core::Enum" <|-- "super_lista::screens::home_screen.dart::SampleItem"
+
+class "super_lista::screens::lista_compra_itens_screen.dart::ListaDeCompraItensScreen" {
+  +ListaDeCompra listaDeCompra
+  +State<ListaDeCompraItensScreen> createState()
+}
+
+"super_lista::screens::lista_compra_itens_screen.dart::ListaDeCompraItensScreen" o-- "super_lista::models::lista_de_compra.dart::ListaDeCompra"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "super_lista::screens::lista_compra_itens_screen.dart::ListaDeCompraItensScreen"
+
+class "super_lista::screens::lista_compra_itens_screen.dart::_ListaDeCompraItensScreenState" {
+  +double valorPorcentagem
+  +double montanteConcluido
+  +double montanteTotal
+  +AvaliableScreen screen
+  -void _showModalFormItem()
+  -void _addItem()
+  -dynamic _onItemSubmit()
+  +Widget build()
+  -Widget _titulo()
+  -Widget _itens()
+  -Widget _itensListView()
+  +Container secondaryBackgroundDismissible()
+  +Container primaryBackgroundDismissible()
+}
+
+"super_lista::screens::lista_compra_itens_screen.dart::_ListaDeCompraItensScreenState" o-- "super_lista::utils::avaliable_screen.dart::AvaliableScreen"
+"flutter::src::widgets::framework.dart::State" <|-- "super_lista::screens::lista_compra_itens_screen.dart::_ListaDeCompraItensScreenState"
+
+class "super_lista::utils::avaliable_screen.dart::AvaliableScreen" {
+  +double screenHeight
+  +double screenWidth
+  +double offsetTop
+  +double offsetBottom
+  +double offsetLeft
+  +double offsetRight
+  +double vh()
+  +double vw()
+}
+
+class "super_lista::utils::colors.dart::ColorsSl" {
+  {static} +Color primary
+  {static} +Color secondary
+  {static} +Color defaultC
+  {static} +Color defaultC05
+  {static} +Color textBody
+  {static} +Color textBodySecondary
+  {static} +Color titleBodySecondary
+}
+
+"super_lista::utils::colors.dart::ColorsSl" o-- "dart::ui::Color"
+
+class "super_lista::utils::currency_input_formatter.dart::CurrencyInputFormatter" {
+  {static} -NumberFormat _currencyFormat
+  +TextEditingValue formatEditUpdate()
+  {static} +double? unformat()
+  {static} +String format()
+}
+"super_lista::utils::currency_input_formatter.dart::CurrencyInputFormatter" o-- "intl::src::intl::number_format.dart::NumberFormat"
+"flutter::src::services::text_formatter.dart::TextInputFormatter" <|-- "super_lista::utils::currency_input_formatter.dart::CurrencyInputFormatter"
+
+class "super_lista::utils::date_format.dart::DateFormatSl" {
+  -DateFormat _formatter
+  +dynamic format()
+}
+
+"super_lista::utils::date_format.dart::DateFormatSl" o-- "intl::src::intl::date_format.dart::DateFormat"
+
+class "super_lista::utils::number_format.dart::NumberformatSl" {
+  {static} +dynamic format()
+}
+
+
+@enduml

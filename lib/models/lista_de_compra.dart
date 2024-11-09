@@ -46,12 +46,14 @@ class ListaDeCompra {
     };
   }
 
-  Stream<DocumentSnapshot<ListaDeCompra>> find(String id) {
+  // Captura um stream de uma lista no firestore
+  static Stream<DocumentSnapshot<ListaDeCompra>> find(String id) {
     Stream<DocumentSnapshot<ListaDeCompra>> stream = _collectionRef.doc(id).snapshots();
 
     return stream;
   }
 
+  // Captura um stream de todas as listas no firestore
   static Stream<QuerySnapshot<ListaDeCompra>> all() {
     final userId = Auth.id();
     // Obtendo o stream de snapshots da coleção filtrando pelo "userId"
@@ -67,12 +69,14 @@ class ListaDeCompra {
     _collectionRef.doc(id).set(this);
     return this;
   }
-
+ 
+  // Captura os itens relacionados a esta lista
   Stream<QuerySnapshot<ListaDeCompraItem>>? itens() {
     if (id != null) return ListaDeCompraItem.all(id!);
     return null;
   }
 
+  // Deleta esta lista
   void delete() {
     _collectionRef.doc(id).delete();
 
