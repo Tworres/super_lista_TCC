@@ -7,10 +7,6 @@ class "super_lista::blocs::lista_de_compra_form.dart::ListaDeCompraForm" {
   +State<ListaDeCompraForm> createState()
 }
 
-"super_lista::blocs::lista_de_compra_form.dart::ListaDeCompraForm" o-- "null::dynamic Function(ListaDeCompra, String, DateTime)"
-"super_lista::blocs::lista_de_compra_form.dart::ListaDeCompraForm" o-- "super_lista::models::lista_de_compra.dart::ListaDeCompra"
-"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "super_lista::blocs::lista_de_compra_form.dart::ListaDeCompraForm"
-
 class "super_lista::blocs::lista_de_compra_form.dart::_ListaDeCompraFormState" {
   -TextEditingController _tituloController
   -DateTime? _selectedDate
@@ -20,8 +16,6 @@ class "super_lista::blocs::lista_de_compra_form.dart::_ListaDeCompraFormState" {
   +Widget build()
 }
 
-"super_lista::blocs::lista_de_compra_form.dart::_ListaDeCompraFormState" o-- "flutter::src::widgets::editable_text.dart::TextEditingController"
-"flutter::src::widgets::framework.dart::State" <|-- "super_lista::blocs::lista_de_compra_form.dart::_ListaDeCompraFormState"
 
 class "super_lista::blocs::lista_de_compra_item_form.dart::ListaDeCompraItemForm" {
   +ListaDeCompraItem listaDeCompraItem
@@ -30,8 +24,6 @@ class "super_lista::blocs::lista_de_compra_item_form.dart::ListaDeCompraItemForm
 }
 
 "super_lista::blocs::lista_de_compra_item_form.dart::ListaDeCompraItemForm" o-- "super_lista::models::lista_de_compra_item.dart::ListaDeCompraItem"
-"super_lista::blocs::lista_de_compra_item_form.dart::ListaDeCompraItemForm" o-- "null::dynamic Function(String, int, double, ListaDeCompraItem)"
-"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "super_lista::blocs::lista_de_compra_item_form.dart::ListaDeCompraItemForm"
 
 class "super_lista::blocs::lista_de_compra_item_form.dart::_ListaDeCompraItemFormState" {
   -TextEditingController _tituloController
@@ -46,8 +38,6 @@ class "super_lista::blocs::lista_de_compra_item_form.dart::_ListaDeCompraItemFor
   +Widget build()
 }
 
-"super_lista::blocs::lista_de_compra_item_form.dart::_ListaDeCompraItemFormState" o-- "flutter::src::widgets::editable_text.dart::TextEditingController"
-"flutter::src::widgets::framework.dart::State" <|-- "super_lista::blocs::lista_de_compra_item_form.dart::_ListaDeCompraItemFormState"
 
 class "super_lista::blocs::valor_estimado.dart::ValorEstimado" {
   +List<ListaDeCompraItem>? itens
@@ -56,29 +46,13 @@ class "super_lista::blocs::valor_estimado.dart::ValorEstimado" {
   +Color? progressBarColor
   +double? fontSize
   +Widget build()
-}
 
-"super_lista::blocs::valor_estimado.dart::ValorEstimado" o-- "flutter::src::painting::text_style.dart::TextStyle"
-"super_lista::blocs::valor_estimado.dart::ValorEstimado" o-- "dart::ui::Color"
-"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "super_lista::blocs::valor_estimado.dart::ValorEstimado"
-
-class "super_lista::firebase_options.dart::DefaultFirebaseOptions" {
-  {static} +FirebaseOptions web
-  {static} +FirebaseOptions android
-  {static} +FirebaseOptions ios
-  {static} +FirebaseOptions macos
-  {static} +FirebaseOptions windows
-  {static} +FirebaseOptions currentPlatform
-}
-
-"super_lista::firebase_options.dart::DefaultFirebaseOptions" o-- "firebase_core_platform_interface::firebase_core_platform_interface.dart::FirebaseOptions"
 
 class "super_lista::main.dart::MyApp" {
   +Widget build()
   -ThemeData _themeDataSuperLista()
 }
 
-"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "super_lista::main.dart::MyApp"
 
 class "super_lista::models::lista_de_compra.dart::ListaDeCompra" {
   +String? id
@@ -93,8 +67,6 @@ class "super_lista::models::lista_de_compra.dart::ListaDeCompra" {
   +Stream<QuerySnapshot<ListaDeCompraItem>>? itens()
   +void delete()
 }
-
-"super_lista::models::lista_de_compra.dart::ListaDeCompra" o-- "cloud_firestore::cloud_firestore.dart::CollectionReference<ListaDeCompra>"
 
 class "super_lista::models::lista_de_compra_item.dart::ListaDeCompraItem" {
   +String? titulo
@@ -115,15 +87,8 @@ class "super_lista::models::lista_de_compra_item.dart::ListaDeCompraItem" {
   +void delete()
 }
 
-"super_lista::models::lista_de_compra_item.dart::ListaDeCompraItem" o-- "cloud_firestore::cloud_firestore.dart::CollectionReference<ListaDeCompraItem>"
-"super_lista::models::model_base.dart::ModelBase" <|-- "super_lista::models::lista_de_compra_item.dart::ListaDeCompraItem"
 
-abstract class "super_lista::models::model_base.dart::ModelBase" {
-  {static} +FirebaseFirestore db
-  {static} +String uid
-}
 
-"super_lista::models::model_base.dart::ModelBase" o-- "cloud_firestore::cloud_firestore.dart::FirebaseFirestore"
 
 class "super_lista::providers::auth.dart::Auth" {
   -UserCredential? _userCredential
@@ -137,8 +102,6 @@ class "super_lista::providers::auth.dart::Auth" {
   {static} +dynamic ensureInitialized()
 }
 
-"super_lista::providers::auth.dart::Auth" o-- "firebase_auth::firebase_auth.dart::UserCredential"
-"super_lista::providers::auth.dart::Auth" o-- "firebase_auth::firebase_auth.dart::User"
 "super_lista::providers::auth.dart::Auth" o-- "super_lista::providers::auth.dart::AuthState"
 "super_lista::providers::auth.dart::Auth" o-- "super_lista::providers::auth.dart::Auth"
 
@@ -151,13 +114,11 @@ class "super_lista::providers::auth.dart::AuthState" {
 }
 
 "super_lista::providers::auth.dart::AuthState" o-- "super_lista::providers::auth.dart::AuthState"
-"dart::core::Enum" <|-- "super_lista::providers::auth.dart::AuthState"
 
 class "super_lista::screens::home_screen.dart::Home" {
   +State<Home> createState()
 }
 
-"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "super_lista::screens::home_screen.dart::Home"
 
 class "super_lista::screens::home_screen.dart::_HomeState" {
   +AvaliableScreen screen
@@ -172,7 +133,6 @@ class "super_lista::screens::home_screen.dart::_HomeState" {
 
 "super_lista::screens::home_screen.dart::_HomeState" o-- "super_lista::utils::avaliable_screen.dart::AvaliableScreen"
 "super_lista::screens::home_screen.dart::_HomeState" o-- "super_lista::screens::home_screen.dart::SampleItem"
-"flutter::src::widgets::framework.dart::State" <|-- "super_lista::screens::home_screen.dart::_HomeState"
 
 class "super_lista::screens::home_screen.dart::SampleItem" {
   +int index
@@ -183,7 +143,6 @@ class "super_lista::screens::home_screen.dart::SampleItem" {
 }
 
 "super_lista::screens::home_screen.dart::SampleItem" o-- "super_lista::screens::home_screen.dart::SampleItem"
-"dart::core::Enum" <|-- "super_lista::screens::home_screen.dart::SampleItem"
 
 class "super_lista::screens::lista_compra_itens_screen.dart::ListaDeCompraItensScreen" {
   +ListaDeCompra listaDeCompra
@@ -191,7 +150,6 @@ class "super_lista::screens::lista_compra_itens_screen.dart::ListaDeCompraItensS
 }
 
 "super_lista::screens::lista_compra_itens_screen.dart::ListaDeCompraItensScreen" o-- "super_lista::models::lista_de_compra.dart::ListaDeCompra"
-"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "super_lista::screens::lista_compra_itens_screen.dart::ListaDeCompraItensScreen"
 
 class "super_lista::screens::lista_compra_itens_screen.dart::_ListaDeCompraItensScreenState" {
   +double valorPorcentagem
@@ -210,7 +168,6 @@ class "super_lista::screens::lista_compra_itens_screen.dart::_ListaDeCompraItens
 }
 
 "super_lista::screens::lista_compra_itens_screen.dart::_ListaDeCompraItensScreenState" o-- "super_lista::utils::avaliable_screen.dart::AvaliableScreen"
-"flutter::src::widgets::framework.dart::State" <|-- "super_lista::screens::lista_compra_itens_screen.dart::_ListaDeCompraItensScreenState"
 
 class "super_lista::utils::avaliable_screen.dart::AvaliableScreen" {
   +double screenHeight
@@ -233,7 +190,6 @@ class "super_lista::utils::colors.dart::ColorsSl" {
   {static} +Color titleBodySecondary
 }
 
-"super_lista::utils::colors.dart::ColorsSl" o-- "dart::ui::Color"
 
 class "super_lista::utils::currency_input_formatter.dart::CurrencyInputFormatter" {
   {static} -NumberFormat _currencyFormat
@@ -241,15 +197,12 @@ class "super_lista::utils::currency_input_formatter.dart::CurrencyInputFormatter
   {static} +double? unformat()
   {static} +String format()
 }
-"super_lista::utils::currency_input_formatter.dart::CurrencyInputFormatter" o-- "intl::src::intl::number_format.dart::NumberFormat"
-"flutter::src::services::text_formatter.dart::TextInputFormatter" <|-- "super_lista::utils::currency_input_formatter.dart::CurrencyInputFormatter"
 
 class "super_lista::utils::date_format.dart::DateFormatSl" {
   -DateFormat _formatter
   +dynamic format()
 }
 
-"super_lista::utils::date_format.dart::DateFormatSl" o-- "intl::src::intl::date_format.dart::DateFormat"
 
 class "super_lista::utils::number_format.dart::NumberformatSl" {
   {static} +dynamic format()
